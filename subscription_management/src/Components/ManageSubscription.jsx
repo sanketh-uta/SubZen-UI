@@ -3,7 +3,8 @@ import { useUser } from "./UserContext";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { parse, format } from "date-fns";
-const backend = "http://localhost:1010/";
+import { BACKEND_URL } from "../config";
+
 function ManageSubscription() {
   const { user } = useUser();
   // State for subscriptions data
@@ -44,7 +45,7 @@ function ManageSubscription() {
   const fetchSubscriptions = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(backend + "addSub", {
+      const response = await axios.get(BACKEND_URL + "addSub", {
         withCredentials: true, // Important for sending cookies
       });
       console.log("API response:", response);
@@ -163,7 +164,7 @@ function ManageSubscription() {
     console.log("Data being sent to backend:", postData);
 
     axios
-      .put(backend + "addSub/edit", JSON.stringify(postData), {
+      .put(BACKEND_URL + "addSub/edit", JSON.stringify(postData), {
         headers: {
           "Content-Type": "application/json",
         },
@@ -205,7 +206,7 @@ function ManageSubscription() {
     };
     console.log("Sending data:", postData);
     axios
-      .post(backend + "addSub", JSON.stringify(postData), {
+      .post(BACKEND_URL + "addSub", JSON.stringify(postData), {
         headers: {
           "Content-Type": "application/json",
         },
@@ -238,7 +239,7 @@ function ManageSubscription() {
     console.log("deleting id " + subscriptionId);
     if (confirm("Are you sure you want to delete this subscription?")) {
       axios
-        .delete(backend + "addSub/delete", {
+        .delete(BACKEND_URL + "addSub/delete", {
           data: { id: subscriptionId }, // This puts the ID in the request body
           headers: {
             "Content-Type": "application/json",

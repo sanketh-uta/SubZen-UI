@@ -6,7 +6,7 @@ import { StyledFirebaseAuth } from "react-firebaseui";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { auth as firebaseAuth } from '../config/firebase';
-
+import { BACKEND_URL } from '../config';
 // Initialize Firebase compat for StyledFirebaseAuth
 // This is needed because StyledFirebaseAuth requires the compat version
 if (!firebase.apps.length) {
@@ -20,8 +20,6 @@ if (!firebase.apps.length) {
     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
   });
 }
-
-const backend = "http://localhost:1010/";
 
 export default () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -45,7 +43,7 @@ export default () => {
             // Make API call to backend
             return axios
               .post(
-                backend + "user",
+                BACKEND_URL + "user",
                 {},
                 {
                   headers: {
@@ -110,7 +108,7 @@ export default () => {
     firebase.auth().signOut();
     try {
       // Call the logout endpoint to clear the httpOnly cookie
-      axios.post(backend + "user/logout", {}, { withCredentials: true });
+      axios.post(BACKEND_URL + "user/logout", {}, { withCredentials: true });
 
       // Update your app state
       setUser(null);
