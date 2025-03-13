@@ -1,32 +1,36 @@
 import styles from "./Header.module.css";
-import React, { createContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import { StyledFirebaseAuth } from "react-firebaseui";
 import axios from "axios";
-import { auth } from "../config/firebase";
 import { useNavigate } from "react-router-dom";
-const backend = "http://localhost:1010/";
-const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID,
-};
-// preventing the configuration again if already configured
+import { auth as firebaseAuth } from '../config/firebase';
+
+// Initialize Firebase compat for StyledFirebaseAuth
+// This is needed because StyledFirebaseAuth requires the compat version
 if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
+  firebase.initializeApp({
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  });
 }
+
+const backend = "http://localhost:1010/";
+
 export default () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  
   const uiConfig = {
     signInFlow: "popup",
-    //what ever we provide are shown
     signInOptions: [
       firebase.auth.GoogleAuthProvider.PROVIDER_ID,
       firebase.auth.EmailAuthProvider.PROVIDER_ID,
@@ -36,7 +40,6 @@ export default () => {
         setIsAuthModalOpen(false);
 
         const idToken = getToken(authresult);
-        console.log(authresult.user.getIdToken());
         idToken
           .then((token) => {
             // Make API call to backend
@@ -70,6 +73,7 @@ export default () => {
       },
     },
   };
+  
   const getToken = async (authresult) => {
     try {
       const token = await authresult.user.getIdToken();
@@ -79,7 +83,9 @@ export default () => {
       return error;
     }
   };
+  
   useEffect(() => {
+    // Use the compat auth for consistency with StyledFirebaseAuth
     const unregisterAuthObserver = firebase
       .auth()
       .onAuthStateChanged((user) => {
@@ -100,21 +106,21 @@ export default () => {
   };
 
   const handleLogout = () => {
+    // Using compat auth to be consistent
     firebase.auth().signOut();
     try {
       // Call the logout endpoint to clear the httpOnly cookie
       axios.post(backend + "user/logout", {}, { withCredentials: true });
 
       // Update your app state
-      // For example:
       setUser(null);
-      // navigate('/login');
       navigate("/");
       console.log("Logged out successfully");
     } catch (error) {
       console.error("Logout failed:", error);
     }
   };
+  
   return (
     <>
       {user ? (
